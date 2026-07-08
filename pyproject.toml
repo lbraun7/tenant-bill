@@ -1,0 +1,65 @@
+[project]
+name = "tenant-bill"
+version = "0.1.0"
+description = "Backend SaaS multi-tenant para billing recorrente e usage-based billing."
+authors = [
+    { name = "Lucas Braun" }
+]
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "celery[redis]>=5.4,<6.0",
+    "django>=5.0,<6.0",
+    "django-environ>=0.11,<1.0",
+    "djangorestframework>=3.15,<4.0",
+    "djangorestframework-simplejwt>=5.3,<6.0",
+    "drf-spectacular>=0.27,<1.0",
+    "gunicorn>=22.0,<24.0",
+    "psycopg[binary]>=3.2,<4.0",
+    "stripe>=10.0,<14.0",
+]
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.group.dev.dependencies]
+coverage = { extras = ["toml"], version = ">=7.6,<8.0" }
+factory-boy = ">=3.3,<4.0"
+pytest = ">=8.3,<9.0"
+pytest-django = ">=4.9,<5.0"
+ruff = ">=0.8,<1.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py", "*_test.py", "tests.py"]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+source = ["apps", "config"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "UP",
+    "B",
+    "DJ",
+]
+ignore = [
+    "DJ008",
+]

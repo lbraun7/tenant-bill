@@ -6,10 +6,16 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from apps.accounts.views import RegisterView
+from apps.plans.views import PlanViewSet
+from apps.subscriptions.views import SubscriptionViewSet
 from apps.tenants.views import TenantViewSet
+from apps.usage.views import UsageEventViewSet
 
 router = DefaultRouter()
+router.register("plans", PlanViewSet, basename="plan")
+router.register("subscriptions", SubscriptionViewSet, basename="subscription")
 router.register("tenants", TenantViewSet, basename="tenant")
+router.register("usage-events", UsageEventViewSet, basename="usage-event")
 
 
 def health_check(_request):

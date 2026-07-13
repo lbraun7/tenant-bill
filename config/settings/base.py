@@ -8,6 +8,8 @@ env = environ.Env(
     DEBUG=(bool, False),
     SECRET_KEY=(str, "unsafe-dev-secret-key"),
     ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1", "0.0.0.0"]),
+    STRIPE_SECRET_KEY=(str, ""),
+    STRIPE_WEBHOOK_SECRET=(str, ""),
 )
 env.read_env(BASE_DIR / ".env")
 
@@ -123,3 +125,6 @@ SPECTACULAR_SETTINGS = {
 
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default=CELERY_BROKER_URL)
+
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET")

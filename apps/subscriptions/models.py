@@ -30,7 +30,12 @@ class Subscription(models.Model):
             models.CheckConstraint(
                 condition=models.Q(current_period_end__gt=models.F("current_period_start")),
                 name="subscription_period_end_after_start",
-            )
+            ),
+            models.UniqueConstraint(
+                fields=("external_subscription_id",),
+                condition=~models.Q(external_subscription_id=""),
+                name="unique_non_empty_external_subscription_id",
+            ),
         ]
 
     def __str__(self):

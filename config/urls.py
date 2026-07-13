@@ -10,6 +10,7 @@ from apps.plans.views import PlanViewSet
 from apps.subscriptions.views import SubscriptionViewSet
 from apps.tenants.views import TenantViewSet
 from apps.usage.views import UsageEventViewSet
+from apps.webhooks.views import StripeWebhookView
 
 router = DefaultRouter()
 router.register("plans", PlanViewSet, basename="plan")
@@ -31,4 +32,5 @@ urlpatterns = [
     path("api/auth/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
 ]

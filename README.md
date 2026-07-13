@@ -30,6 +30,7 @@ docker compose up --build
 ```
 
 The API runs at `http://localhost:8000`.
+Docker Compose also starts the Celery worker used to process persisted Stripe webhooks.
 
 ## Useful Commands
 
@@ -46,6 +47,14 @@ make docker-down
 - `GET /health/`
 - `GET /api/schema/`
 - `GET /api/docs/`
+- `POST /webhooks/stripe/` (requires a valid `Stripe-Signature` header)
+
+## Stripe Webhooks
+
+Set `STRIPE_WEBHOOK_SECRET` in `.env`, then forward Stripe events to
+`http://localhost:8000/webhooks/stripe/`. Valid events are persisted before a Celery task is
+published. Event IDs are idempotent, processing failures are recorded, and failed tasks retry
+with exponential backoff.
 
 ## Roadmap
 

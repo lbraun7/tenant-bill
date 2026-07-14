@@ -2,6 +2,10 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
 
+from django.db import transaction
+
+from apps.billing.services import sync_invoice
+from apps.billing.tasks import generate_invoice_pdf
 from apps.subscriptions.models import Subscription
 from apps.webhooks.errors import WebhookProcessingError
 
@@ -109,6 +113,8 @@ def handle_invoice_paid(payload: dict[str, Any]) -> None:
     subscription = _subscription_by_external_id(_invoice_subscription_id(invoice))
     subscription.status = Subscription.Status.ACTIVE
     subscription.save(update_fields=("status", "updated_at"))
+    local_invoice = sync_invoice(subscription, invoice, status="paid")
+    transaction.on_commit(lambda: generate_invoice_pdf.delay(local_invoice.pk))
 
 
 def handle_invoice_payment_failed(payload: dict[str, Any]) -> None:
@@ -116,6 +122,8 @@ def handle_invoice_payment_failed(payload: dict[str, Any]) -> None:
     subscription = _subscription_by_external_id(_invoice_subscription_id(invoice))
     subscription.status = Subscription.Status.PAST_DUE
     subscription.save(update_fields=("status", "updated_at"))
+    local_invoice = sync_invoice(subscription, invoice, status="payment_failed")
+    transaction.on_commit(lambda: generate_invoice_pdf.delay(local_invoice.pk))
 
 
 def handle_subscription_updated(payload: dict[str, Any]) -> None:

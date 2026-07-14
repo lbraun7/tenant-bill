@@ -29,6 +29,9 @@ a tenant explicitly, or omit it to use the user's first active membership.
 - `POST /api/subscriptions/`
 - `GET /api/subscriptions/{id}/`
 - `PATCH /api/subscriptions/{id}/`
+- `GET /api/invoices/`
+- `GET /api/invoices/{id}/`
+- `GET /api/invoices/{id}/pdf/`
 - `GET /api/usage-events/`
 - `POST /api/usage-events/`
 - `GET /api/usage-events/{id}/`
@@ -40,3 +43,7 @@ a tenant explicitly, or omit it to use the user's first active membership.
 This public endpoint authenticates the raw request with the `Stripe-Signature` header. New events
 return `202 Accepted`; already persisted event IDs return `200 OK`. Invalid signatures or malformed
 Stripe events return `400 Bad Request`.
+
+Invoice endpoints are read-only. Stripe invoice webhooks create or update the local financial
+history and enqueue PDF generation. Until generation finishes, the detail response has a null
+`pdf_url` and the PDF endpoint returns `404`.

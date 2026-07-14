@@ -2,6 +2,7 @@ import factory
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
+from apps.billing.models import Invoice, InvoiceLine
 from apps.plans.models import Plan
 from apps.subscriptions.models import Subscription
 from apps.tenants.models import Tenant, TenantMembership
@@ -73,3 +74,31 @@ class UsageEventFactory(factory.django.DjangoModelFactory):
     quantity = 10
     occurred_at = factory.LazyFunction(timezone.now)
     metadata = factory.Dict({})
+
+
+class InvoiceFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Invoice
+
+    tenant = factory.SelfAttribute("subscription.tenant")
+    subscription = factory.SubFactory(SubscriptionFactory)
+    external_invoice_id = factory.Sequence(lambda n: f"in_{n}")
+    number = factory.Sequence(lambda n: f"INV-{n:04d}")
+    status = Invoice.Status.OPEN
+    currency = "USD"
+    subtotal_cents = 4900
+    total_cents = 4900
+    amount_due_cents = 4900
+
+
+class InvoiceLineFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = InvoiceLine
+
+    invoice = factory.SubFactory(InvoiceFactory)
+    external_line_id = factory.Sequence(lambda n: f"il_{n}")
+    description = "Monthly subscription"
+    quantity = 1
+    unit_amount_cents = 4900
+    amount_cents = 4900
+    currency = "USD"

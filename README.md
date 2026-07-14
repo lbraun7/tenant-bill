@@ -56,6 +56,10 @@ Set `STRIPE_WEBHOOK_SECRET` in `.env`, then forward Stripe events to
 published. Event IDs are idempotent, processing failures are recorded, and failed tasks retry
 with exponential backoff.
 
+Paid and failed invoice events also synchronize an immutable, tenant-scoped set of invoice lines
+and enqueue a local PDF. Development uses `MEDIA_ROOT`; production can set
+`DEFAULT_FILE_STORAGE_BACKEND` to a Django S3-compatible storage backend.
+
 ## Roadmap
 
 See [ROADMAP.md](ROADMAP.md) for implementation phases and architectural decisions.

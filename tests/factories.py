@@ -6,7 +6,7 @@ from apps.billing.models import Invoice, InvoiceLine
 from apps.plans.models import Plan
 from apps.subscriptions.models import Subscription
 from apps.tenants.models import Tenant, TenantMembership
-from apps.usage.models import UsageEvent
+from apps.usage.models import UsageEvent, UsageMetric
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -74,6 +74,17 @@ class UsageEventFactory(factory.django.DjangoModelFactory):
     quantity = 10
     occurred_at = factory.LazyFunction(timezone.now)
     metadata = factory.Dict({})
+
+
+class UsageMetricFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = UsageMetric
+
+    tenant = factory.SubFactory(TenantFactory)
+    name = factory.Sequence(lambda n: f"API calls {n}")
+    code = factory.Sequence(lambda n: f"api-calls-{n}")
+    unit_name = "request"
+    stripe_event_name = factory.Sequence(lambda n: f"api_calls_{n}")
 
 
 class InvoiceFactory(factory.django.DjangoModelFactory):

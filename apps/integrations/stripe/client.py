@@ -19,3 +19,15 @@ def verify_webhook_event(payload: bytes, signature: str) -> dict[str, Any]:
         raise InvalidWebhookError("Invalid Stripe webhook signature or payload.") from exc
 
     return json.loads(json.dumps(event))
+
+
+def create_meter_event(*, event_name: str, customer_id: str, value: int, identifier: str):
+    """Send usage through the Stripe boundary so callers remain SDK-agnostic."""
+    try:
+        return stripe.billing.MeterEvent.create(
+            event_name=event_name,
+            identifier=identifier,
+            payload={"stripe_customer_id": customer_id, "value": str(value)},
+        )
+    except stripe.StripeError as exc:
+        raise RuntimeError("Stripe rejected the meter event.") from exc

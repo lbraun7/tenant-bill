@@ -13,6 +13,7 @@ class InvoiceViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
+    queryset = Invoice.objects.none()
     serializer_class = InvoiceSerializer
     permission_classes = (IsAuthenticated, HasCurrentTenant)
     http_method_names = ["get", "head", "options"]

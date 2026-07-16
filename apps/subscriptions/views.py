@@ -13,6 +13,7 @@ class SubscriptionViewSet(
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
+    queryset = Subscription.objects.none()
     serializer_class = SubscriptionSerializer
     permission_classes = (IsAuthenticated, HasCurrentTenant)
     http_method_names = ["get", "post", "patch", "head", "options"]

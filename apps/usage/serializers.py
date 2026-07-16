@@ -94,3 +94,18 @@ class UsageEventSerializer(serializers.ModelSerializer):
 
         transaction.on_commit(lambda: sync_usage_event.delay(event.pk), robust=True)
         return event
+
+
+class CurrentUsageMetricSerializer(serializers.Serializer):
+    metric_id = serializers.IntegerField(allow_null=True)
+    metric_code = serializers.CharField(allow_null=True)
+    quantity = serializers.IntegerField()
+
+
+class CurrentUsageSerializer(serializers.Serializer):
+    subscription_id = serializers.IntegerField()
+    period_start = serializers.DateField()
+    period_end = serializers.DateField()
+    included_units = serializers.IntegerField()
+    total_quantity = serializers.IntegerField()
+    metrics = CurrentUsageMetricSerializer(many=True)

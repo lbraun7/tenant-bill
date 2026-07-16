@@ -1,7 +1,12 @@
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import include, path
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from drf_spectacular.utils import extend_schema
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -21,6 +26,14 @@ router.register("tenants", TenantViewSet, basename="tenant")
 router.register("usage-events", UsageEventViewSet, basename="usage-event")
 
 
+class UsageEventIngestViewSet(UsageEventViewSet):
+    """Separate schema identity for the convenience ingestion alias."""
+
+    @extend_schema(operation_id="usage_event_ingest")
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+
 def health_check(_request):
     return JsonResponse({"status": "ok"})
 
@@ -35,10 +48,11 @@ urlpatterns = [
     path("api/usage/", CurrentUsageView.as_view(), name="current-usage"),
     path(
         "api/usage/events/",
-        UsageEventViewSet.as_view({"post": "create"}),
+        UsageEventIngestViewSet.as_view({"post": "create"}),
         name="usage-event-ingest",
     ),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
     path("webhooks/stripe/", StripeWebhookView.as_view(), name="stripe-webhook"),
 ]

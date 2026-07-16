@@ -16,3 +16,14 @@ failure without processing an event twice.
 The worker claims the event under a database lock and applies its domain handler in a transaction.
 Successful known events become `processed`, unsupported events become `ignored`, and failures become
 `failed` with the error retained for operations. Celery retries failures with exponential backoff.
+
+## Domain flows
+
+Subscriptions are tenant-owned local projections of Stripe state. Invoice webhooks update the
+financial history and publish PDF generation only after the database transaction commits. Usage is
+an immutable ledger: every accepted event carries tenant ownership and an optional tenant-scoped
+idempotency key, while Stripe meter synchronization runs asynchronously.
+
+The HTTP API resolves the active tenant from `X-Tenant-Slug` (or the user's first active
+membership), and domain querysets are always narrowed to it. Django Admin exposes tenant, provider
+IDs, processing status, and retained errors for operational investigation.

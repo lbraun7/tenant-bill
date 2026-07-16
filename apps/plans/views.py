@@ -13,6 +13,7 @@ class PlanViewSet(
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
+    queryset = Plan.objects.none()
     serializer_class = PlanSerializer
     permission_classes = (IsAuthenticated, HasCurrentTenant)
     lookup_field = "slug"

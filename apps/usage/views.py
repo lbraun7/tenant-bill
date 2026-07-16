@@ -1,4 +1,5 @@
 from django.db.models import Sum
+from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -6,7 +7,7 @@ from rest_framework.views import APIView
 
 from apps.tenants.permissions import HasCurrentTenant
 from apps.usage.models import UsageEvent
-from apps.usage.serializers import UsageEventSerializer
+from apps.usage.serializers import CurrentUsageSerializer, UsageEventSerializer
 
 
 class UsageEventViewSet(
@@ -15,6 +16,7 @@ class UsageEventViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
+    queryset = UsageEvent.objects.none()
     serializer_class = UsageEventSerializer
     permission_classes = (IsAuthenticated, HasCurrentTenant)
     http_method_names = ["get", "post", "head", "options"]
@@ -28,6 +30,7 @@ class UsageEventViewSet(
 class CurrentUsageView(APIView):
     permission_classes = (IsAuthenticated, HasCurrentTenant)
 
+    @extend_schema(responses=CurrentUsageSerializer(many=True))
     def get(self, request):
         subscriptions = request.current_tenant.subscriptions.filter(
             status__in=("active", "trialing")

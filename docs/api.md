@@ -1,6 +1,7 @@
 # API
 
-OpenAPI schema will be available at `/api/schema/` and Swagger UI at `/api/docs/`.
+OpenAPI schema is available at `/api/schema/`, Swagger UI at `/api/docs/`, and Redoc at
+`/api/redoc/`.
 
 Authenticated domain endpoints are scoped to the current tenant. Send `X-Tenant-Slug` to select
 a tenant explicitly, or omit it to use the user's first active membership.
@@ -47,3 +48,9 @@ Stripe events return `400 Bad Request`.
 Invoice endpoints are read-only. Stripe invoice webhooks create or update the local financial
 history and enqueue PDF generation. Until generation finishes, the detail response has a null
 `pdf_url` and the PDF endpoint returns `404`.
+
+## Operations
+
+- `GET /health/` is an unauthenticated liveness endpoint.
+- `GET /api/schema/` returns the generated OpenAPI document.
+- `GET /api/docs/` and `GET /api/redoc/` render interactive API documentation.

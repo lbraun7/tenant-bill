@@ -47,6 +47,11 @@ branch = true
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
+fail_under = 90
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]
 
 [tool.ruff]
 line-length = 100

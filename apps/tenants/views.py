@@ -14,6 +14,7 @@ class TenantViewSet(
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
+    queryset = Tenant.objects.none()
     serializer_class = TenantSerializer
     permission_classes = (IsAuthenticated, HasCurrentTenant)
     lookup_field = "slug"

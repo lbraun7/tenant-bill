@@ -28,3 +28,7 @@ class WebhookEventAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
+    date_hierarchy = "created_at"
+
+    def has_add_permission(self, request):
+        return False

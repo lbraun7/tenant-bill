@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.billing.models import Invoice, InvoiceLine
@@ -50,7 +51,8 @@ class InvoiceSerializer(serializers.ModelSerializer):
             "updated_at",
         )
 
-    def get_pdf_url(self, invoice):
+    @extend_schema_field(serializers.URLField(allow_null=True))
+    def get_pdf_url(self, invoice) -> str | None:
         if not invoice.pdf:
             return None
         request = self.context.get("request")

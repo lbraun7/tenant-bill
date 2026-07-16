@@ -10,6 +10,8 @@ env = environ.Env(
     ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1", "0.0.0.0"]),
     STRIPE_SECRET_KEY=(str, ""),
     STRIPE_WEBHOOK_SECRET=(str, ""),
+    LOG_LEVEL=(str, "INFO"),
+    LOG_FORMAT=(str, "json"),
 )
 env.read_env(BASE_DIR / ".env")
 
@@ -141,3 +143,19 @@ CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default=CELERY_BROKER_URL)
 
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
 STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET")
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "json": {"()": "config.logging.JsonFormatter"},
+        "console": {"format": "%(levelname)s %(name)s %(message)s"},
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "json" if env("LOG_FORMAT") == "json" else "console",
+        }
+    },
+    "root": {"handlers": ["console"], "level": env("LOG_LEVEL")},
+}

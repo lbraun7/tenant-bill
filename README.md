@@ -19,6 +19,26 @@ immutable usage, asynchronous work, financial history, and operational traceabil
 - Local invoice projection, auditable lines, asynchronous PDFs, and storage abstraction.
 - JSON logs, searchable Admin, OpenAPI, demo data, Docker setup, and coverage-gated CI.
 
+## Key engineering decisions
+
+- **Explicit tenant resolution:** authenticated requests resolve an active membership from the
+  `X-Tenant-Slug` header, and domain querysets are always scoped to that tenant.
+- **Append-only usage:** consumption is recorded as immutable events instead of mutable counters,
+  preserving the history needed to explain every aggregate.
+- **Tenant-scoped idempotency:** usage keys are unique inside a tenant, preventing retries from
+  counting the same logical event twice without coupling unrelated customers.
+- **Persist webhooks before processing:** Stripe events are authenticated and stored before work is
+  queued, so failures remain observable and can be retried safely.
+- **External provider boundary:** Stripe-specific behavior lives behind a small integration client,
+  keeping domain logic testable without real network calls.
+- **Asynchronous side effects:** provider synchronization and PDF generation run in Celery workers,
+  keeping API latency independent from slow external operations.
+- **Local financial projection:** invoices and their lines are retained locally as an auditable
+  history rather than being read exclusively from the payment provider.
+
+The reasoning and trade-offs behind these choices are documented in
+[Architecture decisions](docs/decisions.md).
+
 ## Architecture
 
 ```mermaid
@@ -69,8 +89,23 @@ docker compose exec api python manage.py migrate
 docker compose exec api python manage.py seed_demo
 ```
 
-The API is available at `http://localhost:8000`. The development-only seed login is
+The portfolio dashboard is available at `http://localhost:3000` and the API at
+`http://localhost:8000`. The development-only seed login is
 `demo@tenantbill.local` / `demo-password`, under tenant slug `acme-demo`.
+
+## Explore the demo
+
+1. Start the stack with `docker compose up --build`.
+2. Create deterministic demo data with
+   `docker compose exec api python manage.py seed_demo`.
+3. Open the portfolio dashboard at `http://localhost:3000`.
+4. Sign in with `demo@tenantbill.local` / `demo-password`.
+5. Register a usage event and observe the current-period total increase immediately.
+6. Inspect the invoice history, then explore the API at `http://localhost:8000/api/docs/`.
+
+The seed command is idempotent, so the walkthrough can be prepared again without duplicating its
+tenant, subscription, metric, or invoice fixtures. A longer request-by-request walkthrough is
+available in [Demo walkthrough](docs/demo.md).
 
 ## Try the API
 

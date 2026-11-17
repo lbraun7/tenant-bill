@@ -5,6 +5,7 @@ description = "Production-minded multi-tenant SaaS billing portfolio built with 
 authors = [
     { name = "Lucas Braun" }
 ]
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.12,<4.0"
 keywords = [
@@ -34,6 +35,7 @@ dependencies = [
 [project.urls]
 Repository = "https://github.com/lbraun7/tenant-bill"
 Documentation = "https://github.com/lbraun7/tenant-bill/tree/main/docs"
+Author = "https://www.linkedin.com/in/lucas-braun-20235395/"
 
 [tool.poetry]
 package-mode = false

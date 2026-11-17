@@ -5,6 +5,7 @@
 ![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)
 [![CI](https://github.com/lbraun7/tenant-bill/actions/workflows/ci.yml/badge.svg)](https://github.com/lbraun7/tenant-bill/actions/workflows/ci.yml)
 ![Coverage threshold](https://img.shields.io/badge/coverage-%E2%89%A590%25-2EA44F)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 TenantBill is a project that demonstrates how to design the critical backend
 infrastructure of a multi-tenant SaaS billing platform. Built with Django, PostgreSQL, Celery, and
@@ -361,6 +362,14 @@ npm test
 CI enforces backend and frontend linting, both test suites, a warning-free OpenAPI schema, the
 frontend production build, and at least 90% branch-aware backend coverage. The testing rationale is
 documented in [docs/testing.md](docs/testing.md).
+
+## Author
+
+**Lucas Braun** — [LinkedIn](https://www.linkedin.com/in/lucas-braun-20235395/)
+
+## License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Documentation
 

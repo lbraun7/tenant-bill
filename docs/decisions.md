@@ -46,6 +46,7 @@ mapping problem.
 
 ## Invoice terminology and storage
 
-The generated document is called an invoice, not a tax invoice or Brazilian *nota fiscal*, because
-there is no fiscal authority integration. Django's storage abstraction keeps local development
-simple while allowing an S3-compatible backend in production without changing domain code.
+The generated document is called an invoice, not a jurisdiction-specific tax or fiscal document,
+because there is no fiscal authority integration. Django's storage abstraction keeps local
+development simple while allowing an S3-compatible backend in production without changing domain
+code.

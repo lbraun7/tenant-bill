@@ -242,6 +242,13 @@ Password: demo-password
 Tenant:   acme-demo
 ```
 
+The demo owner is not a Django staff user. To inspect operational data in Django Admin, create a
+separate superuser:
+
+```bash
+docker compose exec api python manage.py createsuperuser
+```
+
 Inspect the application or stop it with:
 
 ```bash
@@ -352,4 +359,3 @@ The testing rationale is documented in [docs/testing.md](docs/testing.md).
 - [Demo walkthrough](docs/demo.md)
 - [Operations runbook](docs/operations.md)
 - [Testing strategy](docs/testing.md)
-- [Implementation roadmap](ROADMAP.md)

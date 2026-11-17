@@ -1,7 +1,15 @@
 # Demo Walkthrough
 
-Run `make migrate && make seed && make runserver`. The seed is idempotent and creates an active
-subscription, metered usage, and a paid invoice for `acme-demo`.
+Start the complete stack and create the deterministic demo fixtures:
+
+```bash
+docker compose up --build -d
+docker compose exec api python manage.py seed_demo
+```
+
+The seed is idempotent and creates an owner, tenant, plan, active subscription, usage metric/event,
+and paid invoice for `acme-demo`. Open the dashboard at `http://localhost:3000`, or follow the API
+walkthrough below.
 
 ## Authenticate
 
@@ -41,4 +49,19 @@ curl -sS http://localhost:8000/api/usage/events/ \
   -d '{"subscription_id":1,"metric_id":1,"quantity":250,"idempotency_key":"demo-cli-001"}'
 ```
 
-Visit `/api/docs/`, `/api/redoc/`, and `/admin/` to show API discovery and operational debugging.
+## Provider behavior in the demo
+
+The local usage ledger, aggregation, and dashboard work with the placeholder Stripe credentials.
+Asynchronous meter synchronization will be marked `failed` until `STRIPE_SECRET_KEY` is replaced
+with a valid Stripe test-mode key. Signed webhook ingestion additionally requires a matching
+`STRIPE_WEBHOOK_SECRET`.
+
+## API discovery and Admin
+
+Visit `http://localhost:8000/api/docs/` or `http://localhost:8000/api/redoc/` for interactive API
+documentation. The demo owner is intentionally not a Django staff user. Create an operational
+Admin account before opening `http://localhost:8000/admin/`:
+
+```bash
+docker compose exec api python manage.py createsuperuser
+```

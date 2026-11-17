@@ -1,98 +1,61 @@
-# vinext-starter
+# TenantBill Dashboard
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+The TenantBill frontend is a small portfolio dashboard for exploring the billing backend. It signs
+in through the Django JWT API, loads the selected tenant's subscription, usage, and invoices, and
+can submit idempotent usage events.
 
-## Prerequisites
+## Stack
 
-- Node.js `>=22.13.0`
+- Next.js 16 and React 19
+- TypeScript
+- Tailwind CSS 4
+- Vinext and Vite for the local and Cloudflare-compatible build
 
-## Quick Start
+## Requirements
+
+- Node.js 22.13 or newer
+- TenantBill API running at `http://localhost:8000`, or a custom API URL
+- Demo data created with `python manage.py seed_demo`
+
+## Run locally
 
 ```bash
-npm install
+npm ci
 npm run dev
-npm run build
 ```
 
-This starter does not use `wrangler.jsonc`.
+Open `http://localhost:3000` and sign in with:
 
-## Included Shape
-
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-OpenAI workspace sites can read the current user's email from
-`oai-authenticated-user-email`.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
+```text
+Email:    demo@tenantbill.local
+Password: demo-password
+Tenant:   acme-demo
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+The API URL defaults to `http://localhost:8000`. Override it when needed:
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8000 npm run dev
+```
 
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
+## How it connects to the backend
 
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
+The dashboard obtains a JWT access token from `/api/auth/login/` and sends it with
+`X-Tenant-Slug: acme-demo` to tenant-scoped endpoints. The token is kept in `localStorage` for this
+portfolio demo. A production client should prefer a hardened session strategy and implement access
+token refresh.
 
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
+The interface currently focuses on one deterministic demo tenant. Tenant selection, plan
+management, checkout creation, and customer self-service are outside the dashboard's scope.
 
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
+## Commands
 
-## Useful Commands
+```bash
+npm run dev      # start the development server
+npm run lint     # run ESLint
+npm run build    # create a production build
+npm test         # build and execute the rendered HTML test suite
+```
 
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+The repository retains optional Cloudflare D1, Drizzle, and ChatGPT authentication scaffolding from
+the hosting template, but the TenantBill dashboard does not depend on those features.

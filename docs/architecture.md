@@ -2,9 +2,8 @@
 
 TenantBill is a Django REST Framework backend for a multi-tenant SaaS billing platform.
 
-The first implementation uses a shared database and shared schema. Domain records will carry
-tenant ownership explicitly, and API boundaries will enforce tenant isolation through querysets,
-permissions, and tests.
+The application uses a shared database and shared schema. Domain records carry tenant ownership
+explicitly, and API boundaries enforce tenant isolation through querysets, permissions, and tests.
 
 ## Stripe webhook flow
 
@@ -21,8 +20,8 @@ Successful known events become `processed`, unsupported events become `ignored`,
 
 Subscriptions are tenant-owned local projections of Stripe state. Invoice webhooks update the
 financial history and publish PDF generation only after the database transaction commits. Usage is
-an immutable ledger: every accepted event carries tenant ownership and an optional tenant-scoped
-idempotency key, while Stripe meter synchronization runs asynchronously.
+an immutable ledger: every API-accepted event carries tenant ownership and a required,
+tenant-scoped idempotency key, while Stripe meter synchronization runs asynchronously.
 
 The HTTP API resolves the active tenant from `X-Tenant-Slug` (or the user's first active
 membership), and domain querysets are always narrowed to it. Django Admin exposes tenant, provider

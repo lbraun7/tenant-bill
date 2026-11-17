@@ -6,7 +6,7 @@
 ![Coverage](https://img.shields.io/badge/coverage-91%25-2EA44F)
 ![License](https://img.shields.io/badge/license-not%20specified-lightgrey)
 
-TenantBill is a portfolio project that demonstrates how to design the critical backend
+TenantBill is a project that demonstrates how to design the critical backend
 infrastructure of a multi-tenant SaaS billing platform. Built with Django, PostgreSQL, Celery, and
 Stripe, it supports recurring subscriptions, usage metering, local invoice history, and a small
 Next.js dashboard for exploring the system.
@@ -38,24 +38,73 @@ webhooks, immutable usage, asynchronous work, financial auditability, and operat
 - Making the system operable through structured logs, searchable Admin, OpenAPI, demo data, and
   coverage-gated CI.
 
-## Key engineering decisions
+## Engineering highlights
 
-- **Explicit tenant resolution:** authenticated requests resolve an active membership from the
-  `X-Tenant-Slug` header, and domain querysets are always scoped to that tenant.
-- **Append-only usage:** consumption is recorded as immutable events instead of mutable counters,
-  preserving the history needed to explain every aggregate.
-- **Tenant-scoped idempotency:** usage keys are unique inside a tenant, preventing retries from
-  counting the same logical event twice without coupling unrelated customers.
-- **Persist webhooks before processing:** Stripe events are authenticated and stored before work is
-  queued, so failures remain observable and can be retried safely.
-- **External provider boundary:** Stripe-specific behavior lives behind a small integration client,
-  keeping domain logic testable without real network calls.
-- **Asynchronous side effects:** provider synchronization and PDF generation run in Celery workers,
-  keeping API latency independent from slow external operations.
-- **Local financial projection:** invoices and their lines are retained locally as an auditable
-  history rather than being read exclusively from the payment provider.
+### Tenant isolation at the API boundary
 
-The reasoning and trade-offs behind these choices are documented in
+Shared-schema tenancy is operationally simple, but a single unscoped query can expose another
+customer's data. TenantBill resolves an active membership from the authenticated user and
+`X-Tenant-Slug`, attaches the result to `request.current_tenant`, and scopes both querysets and
+writable relationships to that tenant. Cross-tenant API tests cover list, retrieve, and write
+attempts instead of relying on developer convention alone.
+
+Explore the implementation in
+[`apps/tenants/selectors.py`](apps/tenants/selectors.py),
+[`apps/tenants/permissions.py`](apps/tenants/permissions.py), and
+[`tests/test_tenant_isolation.py`](tests/test_tenant_isolation.py).
+
+### Persist-before-process webhooks
+
+Stripe can redeliver the same event, and a broker or worker can fail at any point. The HTTP
+boundary therefore authenticates the raw payload and persists it under a unique provider event ID
+before publishing any work. Publication happens after the database commit; workers claim events
+under a row lock and retain processing status, attempts, timestamps, and errors. Repeated delivery
+becomes a safe acknowledgement rather than a second financial operation.
+
+Explore the implementation in
+[`apps/webhooks/views.py`](apps/webhooks/views.py),
+[`apps/webhooks/tasks.py`](apps/webhooks/tasks.py), and
+[`tests/test_stripe_webhooks.py`](tests/test_stripe_webhooks.py).
+
+### Usage as an immutable ledger
+
+Usage is recorded as append-only events rather than mutable counters. Each logical event requires
+a tenant-scoped idempotency key and must fall inside the subscription's current billing period.
+Current totals are derived from the ledger, grouped by metric, so they remain explainable and can
+be recomputed after a bug fix. Stripe meter synchronization is asynchronous and exposes its own
+`pending`, `synced`, or `failed` state.
+
+Explore the implementation in
+[`apps/usage/models.py`](apps/usage/models.py),
+[`apps/usage/serializers.py`](apps/usage/serializers.py), and
+[`tests/test_usage_billing.py`](tests/test_usage_billing.py).
+
+### Transaction-aware asynchronous work
+
+Tasks that depend on newly written rows are scheduled with `transaction.on_commit()`, preventing a
+fast Celery worker from reading data that has not committed yet. Provider synchronization, webhook
+handling, and invoice PDF generation run outside the request path with bounded retries and
+exponential backoff, while durable state makes failures visible to operators.
+
+Explore the implementation in
+[`apps/usage/tasks.py`](apps/usage/tasks.py),
+[`apps/billing/tasks.py`](apps/billing/tasks.py), and
+[`config/celery.py`](config/celery.py).
+
+### Local financial projection behind a provider boundary
+
+Stripe SDK calls are isolated in a small integration package instead of being spread through API
+views. Webhook handlers translate provider events into local subscription and invoice state;
+invoice lines are retained for auditability, and PDFs are generated through Django's storage
+abstraction. Domain behavior can therefore be tested without live network calls while Stripe
+remains the external source of payment truth.
+
+Explore the implementation in
+[`apps/integrations/stripe/client.py`](apps/integrations/stripe/client.py),
+[`apps/billing/services.py`](apps/billing/services.py), and
+[`tests/test_invoices.py`](tests/test_invoices.py).
+
+The deeper reasoning and trade-offs are documented in
 [Architecture decisions](docs/decisions.md).
 
 ## Architecture
@@ -80,13 +129,13 @@ See [architecture](docs/architecture.md) and [decisions](docs/decisions.md).
 
 ## Stack
 
-| Area | Technology |
-|---|---|
-| API | Python 3.12, Django 5, Django REST Framework, SimpleJWT |
-| Data | PostgreSQL, Redis, Django storage |
-| Async and payments | Celery, Stripe SDK, ReportLab |
-| Quality | pytest, factory_boy, branch coverage, Ruff, GitHub Actions |
-| Delivery | Poetry, Docker Compose, Gunicorn, OpenAPI/Swagger/Redoc |
+| Area               | Technology                                                 |
+| ------------------ | ---------------------------------------------------------- |
+| API                | Python 3.12, Django 5, Django REST Framework, SimpleJWT    |
+| Data               | PostgreSQL, Redis, Django storage                          |
+| Async and payments | Celery, Stripe SDK, ReportLab                              |
+| Quality            | pytest, factory_boy, branch coverage, Ruff, GitHub Actions |
+| Delivery           | Poetry, Docker Compose, Gunicorn, OpenAPI/Swagger/Redoc    |
 
 ## Run locally
 
@@ -148,14 +197,14 @@ The complete demo, including usage ingestion, is in [docs/demo.md](docs/demo.md)
 
 ## API and operations
 
-| Endpoint | Purpose |
-|---|---|
-| `GET /health/` | Process liveness |
-| `GET /api/schema/` | OpenAPI schema |
-| `GET /api/docs/` | Swagger UI |
-| `GET /api/redoc/` | Redoc |
+| Endpoint                 | Purpose                       |
+| ------------------------ | ----------------------------- |
+| `GET /health/`           | Process liveness              |
+| `GET /api/schema/`       | OpenAPI schema                |
+| `GET /api/docs/`         | Swagger UI                    |
+| `GET /api/redoc/`        | Redoc                         |
 | `POST /webhooks/stripe/` | Signed Stripe event ingestion |
-| `/admin/` | Operational domain inspection |
+| `/admin/`                | Operational domain inspection |
 
 Logs are JSON by default. Webhook processing attempts, payloads, errors, invoice provider IDs, PDF
 state, and usage synchronization failures are inspectable in Django Admin. See the

@@ -12,11 +12,17 @@ from apps.usage.models import UsageEvent, UsageMetric
 class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = get_user_model()
+        skip_postgeneration_save = True
 
     username = factory.Sequence(lambda n: f"user{n}@example.com")
     email = factory.SelfAttribute("username")
     first_name = factory.Faker("first_name")
-    password = factory.PostGenerationMethodCall("set_password", "password123")
+
+    @factory.post_generation
+    def password(self, create, extracted, **_kwargs):
+        self.set_password(extracted or "password123")
+        if create:
+            self.save(update_fields=("password",))
 
 
 class TenantFactory(factory.django.DjangoModelFactory):

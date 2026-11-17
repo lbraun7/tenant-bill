@@ -137,7 +137,7 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "TenantBill API",
-    "DESCRIPTION": "Backend SaaS multi-tenant para billing recorrente e usage-based billing.",
+    "DESCRIPTION": "Multi-tenant SaaS backend for recurring and usage-based billing.",
     "VERSION": "0.1.0",
 }
 

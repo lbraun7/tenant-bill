@@ -2,9 +2,9 @@
 
 ![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![Django 5](https://img.shields.io/badge/Django-5-092E20?logo=django&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-36%20passing-2EA44F)
-![Coverage](https://img.shields.io/badge/coverage-91%25-2EA44F)
-![License](https://img.shields.io/badge/license-not%20specified-lightgrey)
+![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)
+[![CI](https://github.com/lbraun7/tenant-bill/actions/workflows/ci.yml/badge.svg)](https://github.com/lbraun7/tenant-bill/actions/workflows/ci.yml)
+![Coverage threshold](https://img.shields.io/badge/coverage-%E2%89%A590%25-2EA44F)
 
 TenantBill is a project that demonstrates how to design the critical backend
 infrastructure of a multi-tenant SaaS billing platform. Built with Django, PostgreSQL, Celery, and
@@ -341,6 +341,8 @@ state, and usage synchronization failures are inspectable in Django Admin. See t
 
 ## Quality checks
 
+Backend:
+
 ```bash
 make lint
 make test
@@ -348,8 +350,17 @@ make coverage
 poetry run python manage.py spectacular --validate --fail-on-warn
 ```
 
-CI enforces lint, all tests, a warning-free OpenAPI schema, and at least 90% branch-aware coverage.
-The testing rationale is documented in [docs/testing.md](docs/testing.md).
+Frontend:
+
+```bash
+cd frontend
+npm run lint
+npm test
+```
+
+CI enforces backend and frontend linting, both test suites, a warning-free OpenAPI schema, the
+frontend production build, and at least 90% branch-aware backend coverage. The testing rationale is
+documented in [docs/testing.md](docs/testing.md).
 
 ## Documentation
 

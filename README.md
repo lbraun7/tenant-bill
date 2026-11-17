@@ -6,18 +6,26 @@
 ![Coverage](https://img.shields.io/badge/coverage-91%25-2EA44F)
 ![License](https://img.shields.io/badge/license-not%20specified-lightgrey)
 
-TenantBill is a production-minded Django backend for recurring and usage-based SaaS billing. It
-focuses on the dangerous parts of a real multi-tenant system: isolation, idempotent webhooks,
-immutable usage, asynchronous work, financial history, and operational traceability.
+TenantBill is a portfolio project that demonstrates how to design the critical backend
+infrastructure of a multi-tenant SaaS billing platform. Built with Django, PostgreSQL, Celery, and
+Stripe, it supports recurring subscriptions, usage metering, local invoice history, and a small
+Next.js dashboard for exploring the system.
 
-## Why this project matters
+Rather than presenting a complete commercial billing product, the project focuses on the failure
+modes and engineering decisions that matter most in a real system: tenant isolation, idempotent
+webhooks, immutable usage, asynchronous work, financial auditability, and operational traceability.
 
-- Shared-schema multi-tenancy with tenant-scoped querysets and cross-tenant security tests.
-- Stripe behind a mockable integration boundary instead of calls spread through views.
-- Persisted, idempotent webhooks with state, retries, locking, and retained failures.
-- Append-only usage ledger with tenant-scoped idempotency and billing-period aggregation.
-- Local invoice projection, auditable lines, asynchronous PDFs, and storage abstraction.
-- JSON logs, searchable Admin, OpenAPI, demo data, Docker setup, and coverage-gated CI.
+## What this project demonstrates
+
+- Designing shared-schema multi-tenancy with tenant-scoped queries and cross-tenant security tests.
+- Building persisted, idempotent webhook processing with retries, locking, and retained failures.
+- Modeling usage as an append-only, auditable ledger with tenant-scoped idempotency.
+- Isolating Stripe behind a mockable integration boundary instead of coupling it to API views.
+- Coordinating database transactions with asynchronous Celery tasks and external side effects.
+- Maintaining a local financial projection with invoice lines, generated PDFs, and storage
+  abstraction.
+- Making the system operable through structured logs, searchable Admin, OpenAPI, demo data, and
+  coverage-gated CI.
 
 ## Key engineering decisions
 

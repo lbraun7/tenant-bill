@@ -76,14 +76,18 @@ class Command(BaseCommand):
                 "is_active": True,
             },
         )
+        usage_period_key = subscription.current_period_start.isoformat()
         UsageEvent.objects.get_or_create(
             tenant=tenant,
-            idempotency_key="demo-usage-001",
+            idempotency_key=f"demo-usage-{usage_period_key}",
             defaults={
                 "subscription": subscription,
                 "metric": metric,
                 "quantity": 1250,
-                "metadata": {"source": "seed_demo"},
+                "metadata": {
+                    "source": "seed_demo",
+                    "billing_period_start": usage_period_key,
+                },
             },
         )
         invoice, _ = Invoice.objects.update_or_create(

@@ -21,9 +21,18 @@ def test_seed_demo_is_idempotent():
     tenant = Tenant.objects.get(slug="acme-demo")
     assert TenantMembership.objects.filter(tenant=tenant, role="owner").count() == 1
     assert Plan.objects.filter(tenant=tenant, slug="growth").count() == 1
-    assert Subscription.objects.filter(external_subscription_id="sub_demo_growth").count() == 1
+    subscription = Subscription.objects.get(external_subscription_id="sub_demo_growth")
     assert UsageMetric.objects.filter(tenant=tenant, code="api-requests").count() == 1
-    assert UsageEvent.objects.filter(tenant=tenant, idempotency_key="demo-usage-001").count() == 1
+    usage_event = UsageEvent.objects.get(
+        tenant=tenant,
+        idempotency_key=f"demo-usage-{subscription.current_period_start.isoformat()}",
+    )
+    assert usage_event.quantity == 1250
+    assert (
+        subscription.current_period_start
+        <= usage_event.occurred_at.date()
+        < subscription.current_period_end
+    )
     assert Invoice.objects.filter(external_invoice_id="in_demo_001").count() == 1
 
 

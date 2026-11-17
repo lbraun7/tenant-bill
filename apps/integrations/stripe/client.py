@@ -28,6 +28,7 @@ def create_meter_event(*, event_name: str, customer_id: str, value: int, identif
             event_name=event_name,
             identifier=identifier,
             payload={"stripe_customer_id": customer_id, "value": str(value)},
+            api_key=settings.STRIPE_SECRET_KEY,
         )
     except stripe.StripeError as exc:
         raise RuntimeError("Stripe rejected the meter event.") from exc

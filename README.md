@@ -212,33 +212,80 @@ See [architecture](docs/architecture.md) and [decisions](docs/decisions.md).
 | Quality            | pytest, factory_boy, branch coverage, Ruff, GitHub Actions |
 | Delivery           | Poetry, Docker Compose, Gunicorn, OpenAPI/Swagger/Redoc    |
 
-## Run locally
+## Quick start
 
-With Python 3.12 and Poetry installed:
+### Docker Compose (recommended)
+
+With Docker and Docker Compose installed, start the complete stack and create deterministic demo
+data:
 
 ```bash
+docker compose up --build -d
+docker compose exec api python manage.py seed_demo
+```
+
+The container entrypoint waits for PostgreSQL and applies migrations automatically. The stack
+starts the Next.js dashboard, Django API, PostgreSQL, Redis, and a Celery worker.
+
+| Service | URL |
+| --- | --- |
+| Portfolio dashboard | `http://localhost:3000` |
+| API | `http://localhost:8000` |
+| Swagger UI | `http://localhost:8000/api/docs/` |
+| Django Admin | `http://localhost:8000/admin/` |
+
+Sign in to the dashboard with:
+
+```text
+Email:    demo@tenantbill.local
+Password: demo-password
+Tenant:   acme-demo
+```
+
+Inspect the application or stop it with:
+
+```bash
+docker compose logs -f api worker
+docker compose down
+```
+
+### Local development
+
+This path requires Python 3.12, Poetry, Node.js 22.13 or newer, and Redis. With no `.env` file,
+Django uses SQLite and the Celery configuration points to Redis on `localhost`.
+
+Start Redis, then run the API:
+
+```bash
+docker compose up -d redis
 poetry install
-cp .env.example .env
 make migrate
 make seed
 make runserver
 ```
 
-Or start the API, PostgreSQL, Redis, and worker together:
+In a second terminal, start the worker:
 
 ```bash
-docker compose up --build
-docker compose exec api python manage.py migrate
-docker compose exec api python manage.py seed_demo
+poetry run celery -A config.celery worker --loglevel=INFO
 ```
 
-The portfolio dashboard is available at `http://localhost:3000` and the API at
-`http://localhost:8000`. The development-only seed login is
-`demo@tenantbill.local` / `demo-password`, under tenant slug `acme-demo`.
+In a third terminal, start the dashboard:
+
+```bash
+cd frontend
+npm ci
+npm run dev
+```
+
+Do not copy `.env.example` unchanged for native execution: it uses the Docker-only hostnames `db`
+and `redis`. To run PostgreSQL and Redis on the host, create a local `.env` and use `localhost` in
+their connection URLs. The placeholder Stripe credentials are sufficient for exploring the local
+projection; real meter synchronization and signed webhooks require Stripe test credentials.
 
 ## Explore the demo
 
-1. Start the stack with `docker compose up --build`.
+1. Start the stack with `docker compose up --build -d`.
 2. Create deterministic demo data with
    `docker compose exec api python manage.py seed_demo`.
 3. Open the portfolio dashboard at `http://localhost:3000`.

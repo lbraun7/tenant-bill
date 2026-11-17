@@ -107,6 +107,81 @@ Explore the implementation in
 The deeper reasoning and trade-offs are documented in
 [Architecture decisions](docs/decisions.md).
 
+## Domain model
+
+```mermaid
+erDiagram
+    USER ||--o{ TENANT_MEMBERSHIP : has
+    TENANT ||--o{ TENANT_MEMBERSHIP : grants
+    TENANT ||--o{ PLAN : owns
+    TENANT ||--o{ SUBSCRIPTION : owns
+    TENANT ||--o{ USAGE_METRIC : defines
+    TENANT ||--o{ USAGE_EVENT : records
+    TENANT ||--o{ INVOICE : retains
+    PLAN ||--o{ SUBSCRIPTION : prices
+    SUBSCRIPTION ||--o{ USAGE_EVENT : consumes
+    USAGE_METRIC o|--o{ USAGE_EVENT : measures
+    SUBSCRIPTION ||--o{ INVOICE : generates
+    INVOICE ||--o{ INVOICE_LINE : contains
+
+    USER {
+        bigint id PK
+        string email
+    }
+    TENANT {
+        bigint id PK
+        string slug UK
+        string name
+    }
+    TENANT_MEMBERSHIP {
+        bigint id PK
+        string role
+        boolean is_active
+    }
+    PLAN {
+        bigint id PK
+        string slug
+        int price_cents
+        int included_usage_units
+    }
+    SUBSCRIPTION {
+        bigint id PK
+        string status
+        string external_subscription_id UK
+        date current_period_start
+        date current_period_end
+    }
+    USAGE_METRIC {
+        bigint id PK
+        string code
+        string stripe_event_name
+    }
+    USAGE_EVENT {
+        bigint id PK
+        int quantity
+        string idempotency_key
+        string sync_status
+        datetime occurred_at
+    }
+    INVOICE {
+        bigint id PK
+        string external_invoice_id UK
+        string status
+        int total_cents
+        string pdf
+    }
+    INVOICE_LINE {
+        bigint id PK
+        string external_line_id
+        int amount_cents
+    }
+```
+
+Tenant ownership is explicit on every billing aggregate, even when it can also be reached through
+another relationship. This deliberate redundancy keeps authorization queries direct and makes
+cross-tenant invariants visible. `WebhookEvent` sits outside this ownership graph: it stores the
+provider event before a handler resolves it to a local subscription or invoice.
+
 ## Architecture
 
 ```mermaid

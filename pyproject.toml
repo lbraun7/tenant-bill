@@ -1,12 +1,22 @@
 [project]
 name = "tenant-bill"
 version = "0.1.0"
-description = "Backend SaaS multi-tenant para billing recorrente e usage-based billing."
+description = "Production-minded multi-tenant SaaS billing portfolio built with Django, Celery, PostgreSQL, and Stripe."
 authors = [
     { name = "Lucas Braun" }
 ]
 readme = "README.md"
 requires-python = ">=3.12,<4.0"
+keywords = [
+    "billing",
+    "celery",
+    "django",
+    "multi-tenant",
+    "postgresql",
+    "saas",
+    "stripe",
+    "webhooks",
+]
 dependencies = [
     "celery[redis]>=5.4,<6.0",
     "django>=5.0,<6.0",
@@ -20,6 +30,10 @@ dependencies = [
     "stripe>=10.0,<14.0",
     "django-cors-headers (>=4.4,<5.0)",
 ]
+
+[project.urls]
+Repository = "https://github.com/lbraun7/tenant-bill"
+Documentation = "https://github.com/lbraun7/tenant-bill/tree/main/docs"
 
 [tool.poetry]
 package-mode = false

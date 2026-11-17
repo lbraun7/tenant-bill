@@ -1,6 +1,7 @@
 {
   "name": "tenant-bill-frontend",
   "version": "0.1.0",
+  "description": "Portfolio dashboard for the TenantBill multi-tenant SaaS billing backend.",
   "private": true,
   "engines": {
     "node": ">=22.13.0"

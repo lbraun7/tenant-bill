@@ -15,6 +15,17 @@ Rather than presenting a complete commercial billing product, the project focuse
 modes and engineering decisions that matter most in a real system: tenant isolation, idempotent
 webhooks, immutable usage, asynchronous work, financial auditability, and operational traceability.
 
+## Demo
+
+![TenantBill dashboard showing the active plan, current usage, and invoice summary](docs/images/tenantbill-dashboard.jpg)
+
+<details>
+<summary>View the demo sign-in screen</summary>
+
+![TenantBill demo sign-in screen](docs/images/tenantbill-login.jpg)
+
+</details>
+
 ## What this project demonstrates
 
 - Designing shared-schema multi-tenancy with tenant-scoped queries and cross-tenant security tests.

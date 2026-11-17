@@ -30,11 +30,11 @@ type Invoice = {
 };
 
 function money(cents: number, currency = "USD") {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency }).format(cents / 100);
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
 }
 
 function number(value: number) {
-  return new Intl.NumberFormat("pt-BR").format(value);
+  return new Intl.NumberFormat("en-US").format(value);
 }
 
 export default function Home() {
@@ -63,7 +63,7 @@ export default function Home() {
       fetch(`${API_URL}/api/invoices/`, { headers }),
     ]);
     if ([tenantResponse, subscriptionResponse, usageResponse, invoiceResponse].some((r) => !r.ok)) {
-      throw new Error("Não foi possível carregar os dados do tenant.");
+      throw new Error("Unable to load tenant data.");
     }
     const subscriptions = (await subscriptionResponse.json()) as Subscription[];
     const usages = (await usageResponse.json()) as Usage[];
@@ -92,13 +92,13 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: email, password }),
       });
-      if (!response.ok) throw new Error("E-mail ou senha inválidos.");
+      if (!response.ok) throw new Error("Invalid email or password.");
       const data = await response.json();
       setToken(data.access);
       window.localStorage.setItem("tenantbill_access", data.access);
       await loadDashboard(data.access);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Falha ao entrar.");
+      setMessage(error instanceof Error ? error.message : "Unable to sign in.");
     } finally {
       setLoading(false);
     }
@@ -121,11 +121,11 @@ export default function Home() {
           metadata: { source: "portfolio-dashboard" },
         }),
       });
-      if (!response.ok) throw new Error("Não foi possível registrar o consumo.");
+      if (!response.ok) throw new Error("Unable to record usage.");
       await loadDashboard(token);
-      setMessage(`${number(Number(quantity))} unidades registradas com sucesso.`);
+      setMessage(`${number(Number(quantity))} units recorded successfully.`);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Falha ao registrar uso.");
+      setMessage(error instanceof Error ? error.message : "Unable to record usage.");
     } finally {
       setLoading(false);
     }
@@ -144,21 +144,21 @@ export default function Home() {
           <a className="brand light" href="#">TenantBill<span>.</span></a>
           <div>
             <p className="eyebrow light">Billing infrastructure</p>
-            <h1>Receita recorrente,<br />sem pontos cegos.</h1>
-            <p className="story-copy">Uma base confiável para assinaturas, consumo e operações financeiras multi-tenant.</p>
+            <h1>Recurring revenue,<br />without blind spots.</h1>
+            <p className="story-copy">Reliable infrastructure for subscriptions, usage, and multi-tenant financial operations.</p>
           </div>
           <p className="story-foot">Django · PostgreSQL · Stripe · Celery</p>
         </section>
         <section className="login-panel">
           <form className="login-card" onSubmit={login}>
-            <p className="eyebrow">Ambiente de demonstração</p>
-            <h2>Bem-vindo de volta</h2>
-            <p className="muted">Acesse o workspace da Acme Demo.</p>
-            <label>E-mail<input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required /></label>
-            <label>Senha<input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required /></label>
+            <p className="eyebrow">Demo environment</p>
+            <h2>Welcome back</h2>
+            <p className="muted">Access the Acme Demo workspace.</p>
+            <label>Email<input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required /></label>
+            <label>Password<input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required /></label>
             {message && <p className="feedback error">{message}</p>}
-            <button className="primary" disabled={loading}>{loading ? "Entrando…" : "Entrar no dashboard"}</button>
-            <p className="demo-hint">Credenciais demo já preenchidas</p>
+            <button className="primary" disabled={loading}>{loading ? "Signing in…" : "Open dashboard"}</button>
+            <p className="demo-hint">Demo credentials are pre-filled</p>
           </form>
         </section>
       </main>
@@ -171,46 +171,46 @@ export default function Home() {
       <aside>
         <a className="brand" href="#">TenantBill<span>.</span></a>
         <nav>
-          <a className="active" href="#overview"><i>01</i>Visão geral</a>
-          <a href="#usage"><i>02</i>Consumo</a>
-          <a href="#invoices"><i>03</i>Faturas</a>
+          <a className="active" href="#overview"><i>01</i>Overview</a>
+          <a href="#usage"><i>02</i>Usage</a>
+          <a href="#invoices"><i>03</i>Invoices</a>
         </nav>
         <div className="aside-bottom">
           <div className="tenant-mini"><b>AD</b><span><strong>{tenant.name}</strong><small>Owner workspace</small></span></div>
-          <button className="text-button" onClick={logout}>Sair</button>
+          <button className="text-button" onClick={logout}>Sign out</button>
         </div>
       </aside>
       <section className="content">
         <header>
-          <div><p className="eyebrow">Workspace / {tenant.slug}</p><h1>Visão geral</h1></div>
-          <span className="live"><i /> Operação normal</span>
+          <div><p className="eyebrow">Workspace / {tenant.slug}</p><h1>Overview</h1></div>
+          <span className="live"><i /> All systems operational</span>
         </header>
 
         <section id="overview" className="hero-grid">
           <article className="plan-card">
-            <div className="card-top"><span>Plano atual</span><em>{subscription?.status ?? "—"}</em></div>
-            <h2>{subscription?.plan.name ?? "Sem assinatura"}</h2>
-            <p><strong>{subscription ? money(subscription.plan.price_cents, subscription.plan.currency) : "—"}</strong> / mês</p>
-            <div className="plan-meta"><span>Próxima renovação</span><b>{subscription ? new Date(`${subscription.current_period_end}T12:00:00`).toLocaleDateString("pt-BR") : "—"}</b></div>
+            <div className="card-top"><span>Current plan</span><em>{subscription?.status ?? "—"}</em></div>
+            <h2>{subscription?.plan.name ?? "No active subscription"}</h2>
+            <p><strong>{subscription ? money(subscription.plan.price_cents, subscription.plan.currency) : "—"}</strong> / month</p>
+            <div className="plan-meta"><span>Next renewal</span><b>{subscription ? new Date(`${subscription.current_period_end}T12:00:00`).toLocaleDateString("en-US") : "—"}</b></div>
           </article>
-          <article className="metric-card"><span>Consumo no período</span><strong>{number(usage?.total_quantity ?? 0)}</strong><small>de {number(usage?.included_units ?? 0)} unidades incluídas</small><div className="progress"><i style={{ width: `${percent}%` }} /></div><p>{percent.toFixed(1).replace(".", ",")}% utilizado</p></article>
-          <article className="metric-card"><span>Faturas</span><strong>{invoices.length}</strong><small>documentos financeiros</small><div className="invoice-total">{invoices[0] ? money(invoices[0].total_cents, invoices[0].currency) : "—"}<span>última cobrança</span></div></article>
+          <article className="metric-card"><span>Usage this period</span><strong>{number(usage?.total_quantity ?? 0)}</strong><small>of {number(usage?.included_units ?? 0)} included units</small><div className="progress"><i style={{ width: `${percent}%` }} /></div><p>{percent.toFixed(1)}% used</p></article>
+          <article className="metric-card"><span>Invoices</span><strong>{invoices.length}</strong><small>financial documents</small><div className="invoice-total">{invoices[0] ? money(invoices[0].total_cents, invoices[0].currency) : "—"}<span>latest charge</span></div></article>
         </section>
 
         <section id="usage" className="section-block">
-          <div className="section-heading"><div><p className="eyebrow">Usage-based billing</p><h2>Registrar consumo</h2></div><p>Simule um evento idempotente de uso para a assinatura ativa.</p></div>
+          <div className="section-heading"><div><p className="eyebrow">Usage-based billing</p><h2>Record usage</h2></div><p>Simulate an idempotent usage event for the active subscription.</p></div>
           <form className="usage-form" onSubmit={addUsage}>
-            <label>Quantidade de requests<input min="1" value={quantity} onChange={(e) => setQuantity(e.target.value)} type="number" required /></label>
-            <div><span>Métrica</span><strong>{usage?.metrics[0]?.metric_code ?? "api-requests"}</strong></div>
-            <div><span>Assinatura</span><strong>#{subscription?.id}</strong></div>
-            <button className="primary" disabled={loading}>{loading ? "Registrando…" : "Registrar evento"}</button>
+            <label>Request quantity<input min="1" value={quantity} onChange={(e) => setQuantity(e.target.value)} type="number" required /></label>
+            <div><span>Metric</span><strong>{usage?.metrics[0]?.metric_code ?? "api-requests"}</strong></div>
+            <div><span>Subscription</span><strong>#{subscription?.id}</strong></div>
+            <button className="primary" disabled={loading}>{loading ? "Recording…" : "Record event"}</button>
           </form>
           {message && <p className="feedback">{message}</p>}
         </section>
 
         <section id="invoices" className="section-block">
-          <div className="section-heading"><div><p className="eyebrow">Histórico financeiro</p><h2>Faturas recentes</h2></div></div>
-          <div className="table-wrap"><table><thead><tr><th>Fatura</th><th>Emissão</th><th>Status</th><th>Total</th><th /></tr></thead><tbody>{invoices.map((invoice) => <tr key={invoice.id}><td><strong>{invoice.number || `#${invoice.id}`}</strong></td><td>{new Date(invoice.created_at).toLocaleDateString("pt-BR")}</td><td><span className="status">{invoice.status}</span></td><td><strong>{money(invoice.total_cents, invoice.currency)}</strong></td><td>{invoice.pdf_url ? <a className="download" href={invoice.pdf_url}>Baixar PDF</a> : <span className="muted">PDF pendente</span>}</td></tr>)}</tbody></table></div>
+          <div className="section-heading"><div><p className="eyebrow">Financial history</p><h2>Recent invoices</h2></div></div>
+          <div className="table-wrap"><table><thead><tr><th>Invoice</th><th>Issued</th><th>Status</th><th>Total</th><th /></tr></thead><tbody>{invoices.map((invoice) => <tr key={invoice.id}><td><strong>{invoice.number || `#${invoice.id}`}</strong></td><td>{new Date(invoice.created_at).toLocaleDateString("en-US")}</td><td><span className="status">{invoice.status}</span></td><td><strong>{money(invoice.total_cents, invoice.currency)}</strong></td><td>{invoice.pdf_url ? <a className="download" href={invoice.pdf_url}>Download PDF</a> : <span className="muted">PDF pending</span>}</td></tr>)}</tbody></table></div>
         </section>
       </section>
     </main>
